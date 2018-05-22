@@ -94,7 +94,7 @@ class GSpy {
 	addWatcherToNode(node) {
 		if(!node || !node.getElementsByTagName) return;
 
-		if(node.className === 'irc_mi') {
+		if(this.loadingTarget) {
 			this.watchingNodesCount++;
 			// console.log('addWatcherToNode: ',node);
 			this.watchTargetInNode(node)			
@@ -105,7 +105,7 @@ class GSpy {
 		if(!iter)
 			iter=0;
 		// console.log('watchingNodesCount: '+this.watchingNodesCount);
-		if(iter < 100) {
+		if(iter < 100 && node.className === 'irc_mi') {
 			const src = node.src;
 			if(!src) {
 				//waiting for src attribute
