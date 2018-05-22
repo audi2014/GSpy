@@ -1,5 +1,3 @@
-
-
 class GSpy {
 	constructor() {
 		this.watchingNodesCount = 0;
@@ -58,21 +56,22 @@ class GSpy {
 
 	parseThumbnail(node) {
 		while(node) {
-				if(node.tagName === 'a') {
-						const id = new URLSearchParams(node.search).get('tbnid');
-						if(id) 
-								return id;
+			if(node.tagName.toLowerCase() === 'a') {
+				const id = new URLSearchParams(node.search).get('tbnid');
+				if(id) {
+					return id;
 				}
-				node = node.parentNode;
+			}
+			node = node.parentNode;
 		}
 	}
 	parseLgImage(node) {
-			while(node) {
-					if(node.dataset && node.dataset['itemId']) {
-							return node.dataset['itemId'];
-					}
-					node = node.parentNode;
+		while(node) {
+			if(node.dataset && node.dataset['itemId']) {
+					return node.dataset['itemId'];
 			}
+			node = node.parentNode;
+		}
 	}
 
 
@@ -89,45 +88,46 @@ class GSpy {
 			this.watchingNodesCount = 0;
 			console.log('handleImageClick: ', id);
 		} else {
-			console.error('handleImageClick: no id in parrent of ', e.target)
+			console.error('handleImageClick: no id in parrents of ', e.target)
 		}
 	}
 	addWatcherToNode(node) {
 		if(!node || !node.getElementsByTagName) return;
+
+		if(node.className === 'irc_mi') {
+			this.watchingNodesCount++;
+			// console.log('addWatcherToNode: ',node);
+			this.watchTargetInNode(node)			
+		}
 		
-		this.watchingNodesCount++;
-		// console.log('addWatcherToNode: ',node);
-		this.watchTargetInNode(node)
 	}
 	watchTargetInNode(node,iter) {
 		if(!iter)
 			iter=0;
-		console.log('watchingNodesCount: '+this.watchingNodesCount);
-		if(iter < 100 && node.className === 'irc_mi') {
+		// console.log('watchingNodesCount: '+this.watchingNodesCount);
+		if(iter < 100) {
 			const src = node.src;
 			if(!src) {
 				//waiting for src attribute
 				setTimeout(
-									function(){
-									this.watchTargetInNode(node,iter+1);
-									}.bind(this),30
-									);
+					function(){
+						this.watchTargetInNode(node,iter+1);
+					}.bind(this),30
+				);
 			} else {
 				//this new dom element with src. check id of container
-				let parentNode = node;
-				while(parentNode.parentNode) {
-					if(parentNode.dataset['itemId'] === this.loadingTarget) {
-						console.log('save src of loadingTarget');
-						this.saveLodingTargetSrc(src);
-						break;
-					} else {
-						parentNode = parentNode.parentNode;
-					}
+				const id = this.parseLgImage(node);
+				if(id && id === this.loadingTarget) {
+					console.log('save src of loadingTarget', id);
+					this.saveLodingTargetSrc(src);
+				} else {
+					// console.log('no src with loadingTarget in this node');
+					this.watchingNodesCount--;					
 				}
-				this.watchingNodesCount--;
+				
 			}
 		} else {
-			console.log('no src with loadingTarget in this node');
+			// console.log('src of irc_mi does not set');
 			this.watchingNodesCount--;
 		}
 		if(this.watchingNodesCount <= 0 && this.loadingTarget) {
