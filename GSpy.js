@@ -1,3 +1,4 @@
+"use strict";
 class GSpy {
 	constructor() {
 		this.watchingNodesCount = 0;
@@ -30,19 +31,25 @@ class GSpy {
 	}
 	saveLodingTargetSrc(src) {
 		console.log('saveLodingTargetSrc: ',src, this.loadingTarget);
-		if(!this.loadingTarget) return;
+		if(navigator && navigator.appVersion && navigator.appVersion.toLowerCase().indexOf("android") !== -1) {
+			//android
+			WebSearchActivity.saveImage(src);
+		} else {
+			//ios
+			if(!this.loadingTarget) return;		
+			this.loadingTarget = null;
+			this.watchingNodesCount = 0;
+			
+			var iframe = document.createElement('IFRAME');
+			iframe.setAttribute('src', 'js-frame:GSpy:' + src);
+			// For some reason we need to set a non-empty size for the iOS6 simulator...
+			iframe.setAttribute('height', '1px');
+			iframe.setAttribute('width', '1px');
+			document.documentElement.appendChild(iframe);
+			iframe.parentNode.removeChild(iframe);
+			iframe = null;
+		}
 		
-		this.loadingTarget = null;
-		this.watchingNodesCount = 0;
-		
-		var iframe = document.createElement('IFRAME');
-		iframe.setAttribute('src', 'js-frame:GSpy:' + src);
-		// For some reason we need to set a non-empty size for the iOS6 simulator...
-		iframe.setAttribute('height', '1px');
-		iframe.setAttribute('width', '1px');
-		document.documentElement.appendChild(iframe);
-		iframe.parentNode.removeChild(iframe);
-		iframe = null;
 	}
 	deleteNavs(node) {
 		let ids = ['qslc', 'navd', 'sfcnt', 'before-appbar', 'topstuff', 'taw'];
