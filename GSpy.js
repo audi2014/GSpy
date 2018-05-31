@@ -30,15 +30,19 @@ class GSpy {
 		}
 	}
 	saveLodingTargetSrc(src) {
+		if(!src) {
+			console.error("saveLodingTargetSrc: no src: ", src);
+			return;
+		}
+		this.loadingTarget = null;
+		this.watchingNodesCount = 0;
 		console.log('saveLodingTargetSrc: ',src, this.loadingTarget);
-		if(navigator && navigator.appVersion && navigator.appVersion.toLowerCase().indexOf("android") !== -1) {
+		if(typeof WebSearchActivity !== "undefined") {
 			//android
 			WebSearchActivity.saveImage(src);
 		} else {
 			//ios
-			if(!this.loadingTarget) return;		
-			this.loadingTarget = null;
-			this.watchingNodesCount = 0;
+			if(!this.loadingTarget) return;
 			
 			var iframe = document.createElement('IFRAME');
 			iframe.setAttribute('src', 'js-frame:GSpy:' + src);
@@ -139,7 +143,12 @@ class GSpy {
 		}
 		if(this.watchingNodesCount <= 0 && this.loadingTarget) {
 			console.log('save default base 64');
-			this.saveLodingTargetSrc(document.getElementById(this.loadingTarget).src);
+			const defaultEl = document.getElementById(this.loadingTarget);
+			if(defaultEl && defaultEl.src) {
+				this.saveLodingTargetSrc(defaultEl.src);
+			} else {
+				console.error("can't save default base 64! element with id ", this.loadingTarget, "does not have src");
+			}
 		}
 	}
 }
