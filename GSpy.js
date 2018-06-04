@@ -30,6 +30,7 @@ class GSpy {
 		}
 	}
 	saveLodingTargetSrc(src) {
+		if(!this.loadingTarget) return;
 		if(!src) {
 			console.error("saveLodingTargetSrc: no src: ", src);
 			return;
@@ -41,9 +42,7 @@ class GSpy {
 			//android
 			WebSearchActivity.saveImage(src);
 		} else {
-			//ios
-			if(!this.loadingTarget) return;
-			
+			//ios			
 			var iframe = document.createElement('IFRAME');
 			iframe.setAttribute('src', 'js-frame:GSpy:' + src);
 			// For some reason we need to set a non-empty size for the iOS6 simulator...
