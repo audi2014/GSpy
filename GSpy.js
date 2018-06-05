@@ -105,7 +105,7 @@ class GSpy {
 					}
 				}
 
-			}.bind(this), 4500);
+			}.bind(this), 2800);
 
 			console.log('handleImageClick: ', id);
 		} else {
