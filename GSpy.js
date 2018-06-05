@@ -1,7 +1,6 @@
 "use strict";
 class GSpy {
 	constructor() {
-		this.watchingNodesCount = 0;
 		this.loadingTarget = null;
 		this.watchTargetInNode = this.watchTargetInNode.bind(this);
 		this.addWatcherToNode = this.addWatcherToNode.bind(this);
@@ -36,7 +35,6 @@ class GSpy {
 			return;
 		}
 		this.loadingTarget = null;
-		this.watchingNodesCount = 0;
 		console.log('saveLodingTargetSrc: ',src, this.loadingTarget);
 		if(typeof WebSearchActivity !== "undefined") {
 			//android
@@ -95,7 +93,20 @@ class GSpy {
 		const id = this.parseThumbnail(e.target);
 		if(id) {
 			this.loadingTarget = id;
-			this.watchingNodesCount = 0;
+			this.clickTimeOut = setTimeout(function(){
+
+				if(this.loadingTarget) {
+					console.log('save default base 64');
+					const defaultEl = document.getElementById(this.loadingTarget);
+					if(defaultEl && defaultEl.src) {
+						this.saveLodingTargetSrc(defaultEl.src);
+					} else {
+						console.error("can't save default base 64! element with id ", this.loadingTarget, "does not have src");
+					}
+				}
+
+			}.bind(this), 4500);
+
 			console.log('handleImageClick: ', id);
 		} else {
 			console.error('handleImageClick: no id in parrents of ', e.target)
@@ -105,8 +116,6 @@ class GSpy {
 		if(!node || !node.getElementsByTagName) return;
 
 		if(this.loadingTarget) {
-			this.watchingNodesCount++;
-			// console.log('addWatcherToNode: ',node);
 			this.watchTargetInNode(node)			
 		}
 		
@@ -114,7 +123,6 @@ class GSpy {
 	watchTargetInNode(node,iter) {
 		if(!iter)
 			iter=0;
-		// console.log('watchingNodesCount: '+this.watchingNodesCount);
 		if(iter < 100 && node.className === 'irc_mi') {
 			const src = node.src;
 			if(!src) {
@@ -130,25 +138,9 @@ class GSpy {
 				if(id && id === this.loadingTarget) {
 					console.log('save src of loadingTarget', id);
 					this.saveLodingTargetSrc(src);
-				} else {
-					// console.log('no src with loadingTarget in this node');
-					this.watchingNodesCount--;					
 				}
-				
 			}
-		} else {
-			// console.log('src of irc_mi does not set');
-			this.watchingNodesCount--;
-		}
-		if(this.watchingNodesCount <= 0 && this.loadingTarget) {
-			console.log('save default base 64');
-			const defaultEl = document.getElementById(this.loadingTarget);
-			if(defaultEl && defaultEl.src) {
-				this.saveLodingTargetSrc(defaultEl.src);
-			} else {
-				console.error("can't save default base 64! element with id ", this.loadingTarget, "does not have src");
-			}
-		}
+		}		
 	}
 }
 
